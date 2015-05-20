@@ -1,0 +1,18 @@
+# Python
+.Python
+*.pyc
+*.pyo
+*.egg-info/
+/share/
+
+# Distribute
+/build/
+/dist/
+/deb_dist/
+
+# Virtualenv
+/bin/
+/include/
+/lib/
+/local/
+
