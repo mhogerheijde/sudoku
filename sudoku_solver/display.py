@@ -7,6 +7,8 @@ def serialise(element):
         return _serialise_grid(element)
     elif isinstance(element, Cell):
         return _serialise_cell(element)
+    else:
+        raise Exception("{} element is Grid nor Cell".format(type(element)))
 
 def simple(element):
     if isinstance(element, Grid):
@@ -29,9 +31,10 @@ def full(element):
 def _default_grid(grid):
     result = u"┏━┯━┯━┳━┯━┯━┳━┯━┯━┓\n"
 
-    for vertical, row in enumerate(grid.cells):
+    for vertical in SUDOKU_RANGE:
         currentRow = ""
-        for horizontal, cell in enumerate(row):
+        for horizontal in SUDOKU_RANGE:
+            cell = grid.cells[(vertical, horizontal)]
 
             delim = u"│" if horizontal % 3 != 0 else u"┃"
 
@@ -52,9 +55,12 @@ def _default_grid(grid):
 
 def _full_grid(grid):
     result = u" ┏━━━━━━━┯━━━━━━━┯━━━━━━━┳━━━━━━━┯━━━━━━━┯━━━━━━━┳━━━━━━━┯━━━━━━━┯━━━━━━━┓\n"
-    for vertical, row in enumerate(grid.cells):
+
+    for vertical in SUDOKU_RANGE:
         currentRowString = ["", "", ""]
-        for horizontal, cell in enumerate(row):
+        for horizontal in SUDOKU_RANGE:
+            cell = grid.cells[(vertical, horizontal)]
+
 
             cellString = full(cell)
 
@@ -79,9 +85,9 @@ def _simple_grid(grid):
     result = "+---+---+---+\n"
     for vertical in SUDOKU_RANGE:
         result += "|"
-        row = grid.cells[vertical]
         for horizontal in SUDOKU_RANGE:
-            cell = row[horizontal]
+            cell = grid.cells[(vertical, horizontal)]
+
             result += simple(cell)
             if horizontal % 3 == 2:
                 result += "|"
@@ -92,10 +98,11 @@ def _simple_grid(grid):
 
 def _serialise_grid(grid):
     result = ""
-    for rows in grid.cells:
-        for cell in rows:
-            result += serialise(cell)
-        result += "\n"
+    for coordinates in grid.cells:
+        vertical, horizontal = coordinates
+        result += serialise(grid.cells[coordinates])
+        if (horizontal % 9 == 8):
+            result += "\n"
     return result
 
 def _serialise_cell(cell):

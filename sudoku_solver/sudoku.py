@@ -1,4 +1,5 @@
 # vim: set fileencoding=UTF-8
+from collections import OrderedDict
 
 SUDOKU_POSSIBILITIES = range(1, 10)
 SUDOKU_RANGE = range(0, 9)
@@ -30,8 +31,8 @@ class Cell(object):
             pass
 
     def set(self, value):
-        if not self.value is None:
-            raise Exception("This cell already has a value")
+        if not self.value is None and self.value != int(value):
+            raise Exception("This cell already has a value {}, which differs from {}".format(self.value, value))
 
         if int(value) not in self.possibilities:
             raise Exception("This cell can only be set to {}".format(self.possibilities))
@@ -67,25 +68,34 @@ class Grid(object):
     Groups they are a member of. Traditionally, each Cell is part of three
     Groups: The "horziontal", the "vertical" and the "block" group.
     """
+
+
+
     def __init__(self):
-        self.cells = []
+        self.cells = OrderedDict()
         self.rows = [Group() for x in SUDOKU_RANGE]
         self.columns = [Group() for x in SUDOKU_RANGE]
         self.blocks = [Group() for x in SUDOKU_RANGE]
 
         for vertical in SUDOKU_RANGE:
-            new_row = []
-
             for horizontal in SUDOKU_RANGE:
                 # New cell at spot (vertical, horizontal)
-                new_cell = Cell((vertical, horizontal))
+                cell = Cell((vertical, horizontal))
 
-                # Add to current row
-                new_row.append(new_cell)
-                self.rows[vertical].addCell(new_cell)
-                self.columns[horizontal].addCell(new_cell)
+                # Add cell to groups and lookup-lists
+                self.cells[(vertical, horizontal)] = cell
+                self.rows[vertical].addCell(cell)
+                self.columns[horizontal].addCell(cell)
 
-            self.cells.append(new_row)
+                # Calculate block number. Groups of nine in a square,
+                # starting with block 0 at the top left.
+                # 012
+                # 345
+                # 678
+                # Where each number is a block of 3 by 3 cells.
+                blockNo = 3 * int(vertical / 3) + (horizontal / 3)
+                self.blocks[blockNo].addCell(cell)
+
 
     def __str__(self):
         result = ""
@@ -94,7 +104,6 @@ class Grid(object):
                 result += str(cell) + " "
             result += "\n"
         return result
-
 
     def readState(self, state):
         lines = state.strip().split("\n")
@@ -115,8 +124,7 @@ class Grid(object):
                 if int(cell) not in SUDOKU_POSSIBILITIES:
                     raise Exception("Invalid cell value '{}': line {}, position {}", cell, lineno, cellno)
 
-
-                self.cells[lineno][cellno].set(cell)
+                self.cells[(lineno, cellno)].set(cell)
 
 
 
