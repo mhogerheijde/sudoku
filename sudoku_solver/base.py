@@ -2,52 +2,53 @@
 
 from sudoku import Grid, Cell
 from . import display
+from solver import Solver
 
 
-random_sudoku_1 = """
-1 2 ? 4 5 6 7 8 9
-2 3 4 5 6 7 8 9 1
-3 4 5 6 7 8 9 1 2
-9 9 9 9 9 9 9 9 9
-5 6 7 8 9 1 2 3 4
-6 7 8 9 1 2 3 4 5
-7 8 ? 1 2 3 4 5 6
-8 9 1 2 3 4 5 6 7
-9 1 2 3 4 5 6 7 ?
+
+
+solvable = """
+9 2 . . 7 . 8 . 4
+. . 3 . . 9 . . .
+. . 8 6 4 1 9 . .
+3 . 5 . . 7 . . .
+7 . . 2 9 5 . . 1
+. . . 3 . . 4 . 5
+. . 2 9 3 6 7 . .
+. . . 1 . . 2 . .
+4 . 6 . 8 . . 5 3
 """
 
-random_sudoku_2 = """
-9 2 ? ? 7 ? 8 ? 4
-? ? 3 ? ? 9 ? ? ?
-? ? 8 6 4 1 9 ? ?
-3 ? 5 ? ? 7 ? ? ?
-7 ? ? 2 9 5 ? ? 1
-? ? ? 3 ? ? 4 ? 5
-? ? 2 9 3 6 7 ? ?
-? ? ? 1 ? ? 2 ? ?
-4 ? 6 ? 8 ? ? 5 3
+partially_solved = """
+9 2 1 5 7 3 8 . 4
+6 4 3 8 2 9 5 . .
+5 7 8 6 4 1 9 . .
+3 . 5 4 . 7 6 . .
+7 . 4 2 9 5 . . 1
+2 . . 3 . 8 4 . 5
+. . 2 9 3 6 7 4 8
+. . . 1 5 4 2 9 6
+4 9 6 7 8 2 1 5 3
 """
 
 def main():
     print u"Sudoku Solver™\n\n"
 
     grid = Grid()
-    grid.readState(random_sudoku_2)
+    grid.readState(solvable)
 
+    solver = Solver(grid)
 
-    # c = Cell((1, 2))
-    # c.set(2)
-    # print c
+    print " ** Unsolved"
+    print unicode(solver)
 
-    print display.serialise(grid)
-    print display.simple(grid)
-    print display.default(grid)
-    print display.full(grid)
+    solver.step()
+    print " ** Step 1"
+    print unicode(solver)
 
-    # print display.simple(grid)
-    # print display.expanded(grid)
-
-    # print grid.expandedString()
+    solver.step()
+    print " ** Step 2"
+    print unicode(solver)
 
 
 
