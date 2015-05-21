@@ -1,5 +1,5 @@
 # vim: set fileencoding=UTF-8
-from . import Grid, Cell, SUDOKU_RANGE, SUDOKU_POSSIBILITIES
+from sudoku import Grid, Cell, SUDOKU_RANGE, SUDOKU_POSSIBILITIES
 
 
 def serialise(element):

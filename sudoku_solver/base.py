@@ -1,6 +1,6 @@
 # vim: set fileencoding=UTF-8
 
-from . import Grid, Cell
+from sudoku import Grid, Cell
 from . import display
 
 
