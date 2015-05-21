@@ -118,7 +118,7 @@ class Grid(object):
                     len(cells), len(SUDOKU_RANGE), lineno, line)
 
             for cellno, cell in enumerate(cells):
-                if str(cell) == "?":
+                if not str(cell).isdigit():
                     continue
 
                 if int(cell) not in SUDOKU_POSSIBILITIES:
