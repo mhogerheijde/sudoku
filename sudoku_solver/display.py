@@ -1,9 +1,9 @@
 # vim: set fileencoding=UTF-8
-from sudoku import Grid, Cell, SUDOKU_RANGE, SUDOKU_POSSIBILITIES
+import sudoku
 
 
 def serialise(element):
-    if isinstance(element, Grid):
+    if isinstance(element, sudoku.Grid):
         return _serialise_grid(element)
     elif isinstance(element, Cell):
         return _serialise_cell(element)
@@ -11,29 +11,29 @@ def serialise(element):
         raise Exception("{} element is Grid nor Cell".format(type(element)))
 
 def simple(element):
-    if isinstance(element, Grid):
+    if isinstance(element, sudoku.Grid):
         return _simple_grid(element)
-    elif isinstance(element, Cell):
+    elif isinstance(element, sudoku.Cell):
         return _default_cell(element)
 
 def default(element):
-    if isinstance(element, Grid):
+    if isinstance(element, sudoku.Grid):
         return _default_grid(element)
-    elif isinstance(element, Cell):
+    elif isinstance(element, sudoku.Cell):
         return _default_cell(element)
 
 def full(element):
-    if isinstance(element, Grid):
+    if isinstance(element, sudoku.Grid):
         return _full_grid(element)
-    elif isinstance(element, Cell):
+    elif isinstance(element, sudoku.Cell):
         return _full_cell(element)
 
 def _default_grid(grid):
     result = u"┏━┯━┯━┳━┯━┯━┳━┯━┯━┓\n"
 
-    for vertical in SUDOKU_RANGE:
+    for vertical in sudoku.SUDOKU_RANGE:
         currentRow = ""
-        for horizontal in SUDOKU_RANGE:
+        for horizontal in sudoku.SUDOKU_RANGE:
             cell = grid.cells[(vertical, horizontal)]
 
             delim = u"│" if horizontal % 3 != 0 else u"┃"
@@ -56,9 +56,9 @@ def _default_grid(grid):
 def _full_grid(grid):
     result = u" ┏━━━━━━━┯━━━━━━━┯━━━━━━━┳━━━━━━━┯━━━━━━━┯━━━━━━━┳━━━━━━━┯━━━━━━━┯━━━━━━━┓\n"
 
-    for vertical in SUDOKU_RANGE:
+    for vertical in sudoku.SUDOKU_RANGE:
         currentRowString = ["", "", ""]
-        for horizontal in SUDOKU_RANGE:
+        for horizontal in sudoku.SUDOKU_RANGE:
             cell = grid.cells[(vertical, horizontal)]
 
 
@@ -83,9 +83,9 @@ def _full_grid(grid):
 
 def _simple_grid(grid):
     result = "+---+---+---+\n"
-    for vertical in SUDOKU_RANGE:
+    for vertical in sudoku.SUDOKU_RANGE:
         result += "|"
-        for horizontal in SUDOKU_RANGE:
+        for horizontal in sudoku.SUDOKU_RANGE:
             cell = grid.cells[(vertical, horizontal)]
 
             result += simple(cell)
@@ -114,7 +114,7 @@ def _default_cell(cell):
 def _full_cell(cell):
     result = []
     current = ""
-    for i, value in enumerate(SUDOKU_POSSIBILITIES):
+    for i, value in enumerate(sudoku.SUDOKU_POSSIBILITIES):
         if value in cell.possibilities:
             current += str(value)
         else:
