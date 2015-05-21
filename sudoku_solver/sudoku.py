@@ -1,5 +1,6 @@
 # vim: set fileencoding=UTF-8
 from collections import OrderedDict
+from copy import copy
 
 SUDOKU_POSSIBILITIES = range(1, 10)
 SUDOKU_RANGE = range(0, 9)
@@ -11,19 +12,16 @@ class Cell(object):
     """
 
     def __init__(self, coordinates=None):
-        self.possibilities = SUDOKU_POSSIBILITIES
+        self.possibilities = copy(SUDOKU_POSSIBILITIES)
+        self.coordinates = coordinates
         self.value = None
-        # Sanity check
-        v, h = coordinates
-        self.coordinates = (v, h)
 
     def __str__(self):
         value = "?" if self.value is None else str(self.value)
-        return "Cell< ({},{}) : {} >".format(self.coordinates[0], self.coordinates[1], value)
+        vertical, horizontal = self.coordinates
+        return "Cell< ({},{}) : {} | {}>".format(vertical, horizontal, value, self.possibilities)
 
     def eliminate(self, value):
-        if self.value == None:
-            raise Exception("Can't eliminate values from fixed cell")
         try:
             self.possibilities.remove(value)
         except:
@@ -58,8 +56,30 @@ class Group(object):
         else:
             self.cells = cells
 
+    def __str__(self):
+        cells = ""
+        for cell in self.cells:
+            cells += "\t{}\n".format(cell)
+        result = "Group<size:{} cells:\n{}>".format(len(self.cells), cells)
+
+        return result
+
     def addCell(self, cell):
+        if cell in self.cells:
+            raise Exception("Cell {} already in this Group", cell)
         self.cells.append(cell)
+
+    def setCell(self, cell, value):
+        if cell not in self.cells:
+            raise Exception("Cell not managed by this group")
+
+        cell.set(value)
+        for c in self.cells:
+
+            if not c is cell:
+                # Yes, Identity check, I want the same object.
+                c.eliminate(value)
+
 
 
 class Grid(object):
@@ -73,9 +93,9 @@ class Grid(object):
 
     def __init__(self):
         self.cells = OrderedDict()
-        self.rows = [Group() for x in SUDOKU_RANGE]
-        self.columns = [Group() for x in SUDOKU_RANGE]
-        self.blocks = [Group() for x in SUDOKU_RANGE]
+        self.rows = {}
+        self.columns = {}
+        self.blocks = {}
 
         for vertical in SUDOKU_RANGE:
             for horizontal in SUDOKU_RANGE:
@@ -84,26 +104,56 @@ class Grid(object):
 
                 # Add cell to groups and lookup-lists
                 self.cells[(vertical, horizontal)] = cell
-                self.rows[vertical].addCell(cell)
-                self.columns[horizontal].addCell(cell)
 
-                # Calculate block number. Groups of nine in a square,
-                # starting with block 0 at the top left.
-                # 012
-                # 345
-                # 678
-                # Where each number is a block of 3 by 3 cells.
-                blockNo = 3 * int(vertical / 3) + (horizontal / 3)
-                self.blocks[blockNo].addCell(cell)
+                coordinates = (vertical, horizontal)
+
+                self._getRow(coordinates).addCell(cell)
+                self._getColumn(coordinates).addCell(cell)
+                self._getBlock(coordinates).addCell(cell)
+
 
 
     def __str__(self):
-        result = ""
-        for rows in self.cells:
-            for cell in rows:
-                result += str(cell) + " "
-            result += "\n"
-        return result
+        cells = ""
+        for vertical, horizontal in self.cells:
+            cell = self.cells[(vertical, horizontal)]
+            cells += "\t{}\n".format(str(cell))
+
+        return "Grid<Size: {}, Cells: \n{}\n>".format(len(self.cells), cells)
+
+    def setCell(self, cell, value):
+        self._getRow(cell.coordinates).setCell(cell, value)
+        self._getColumn(cell.coordinates).setCell(cell, value)
+        self._getBlock(cell.coordinates).setCell(cell, value)
+
+    def _getBlock(self, coordinates):
+        # Calculate block number. Groups of nine in a square,
+        # starting with block 0 at the top left.
+        # 012
+        # 345
+        # 678
+        # Where each number is a block of 3 by 3 cells.
+        vertical, horizontal = coordinates
+        blockNo = 3 * int(vertical / 3) + (horizontal / 3)
+
+        if not blockNo in self.blocks:
+            self.blocks[blockNo] = Group()
+
+        return self.blocks[blockNo]
+
+    def _getRow(self, coordinates):
+        vertical, horizontal = coordinates
+        if not vertical in self.rows:
+            self.rows[vertical] = Group()
+
+        return self.rows[vertical]
+
+    def _getColumn(self, coordinates):
+        vertical, horizontal = coordinates
+        if not horizontal in self.columns:
+            self.columns[horizontal] = Group()
+
+        return self.columns[horizontal]
 
     def readState(self, state):
         lines = state.strip().split("\n")
