@@ -29,28 +29,28 @@ random_sudoku_2 = """
 """
 
 def main():
-	print u"Sudoku Solver™\n\n"
+    print u"Sudoku Solver™\n\n"
 
-	grid = Grid()
-	grid.readState(random_sudoku_2)
+    grid = Grid()
+    grid.readState(random_sudoku_2)
 
 
-	# c = Cell((1, 2))
-	# c.set(2)
-	# print c
+    # c = Cell((1, 2))
+    # c.set(2)
+    # print c
 
-	print display.serialise(grid)
-	print display.simple(grid)
-	print display.default(grid)
-	print display.full(grid)
+    print display.serialise(grid)
+    print display.simple(grid)
+    print display.default(grid)
+    print display.full(grid)
 
-	# print display.simple(grid)
-	# print display.expanded(grid)
+    # print display.simple(grid)
+    # print display.expanded(grid)
 
-	# print grid.expandedString()
+    # print grid.expandedString()
 
 
 
 
 if __name__ == 'main':
-	main()
+    main()
