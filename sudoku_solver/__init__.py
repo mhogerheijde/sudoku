@@ -4,6 +4,10 @@ SUDOKU_POSSIBILITIES = range(1, 10)
 SUDOKU_RANGE = range(0, 9)
 
 class Cell(object):
+    """
+    Represents a single cell in a Sudoku-grid. It keeps track of all
+    available values it can hold.
+    """
 
     def __init__(self, coordinates=None):
         self.possibilities = SUDOKU_POSSIBILITIES
@@ -37,7 +41,12 @@ class Cell(object):
 
 
 class Group(object):
-
+    """
+    A Group represents a logical collection of Cells, for which the Sudoku
+    rule "All possible values must occur exactly once." holds. In other words:
+    when one of the cells in a Group has a specific value, others cells in
+    the same group can't have that value any more.
+    """
 
     def __init__(self, cells=None):
 
@@ -53,7 +62,11 @@ class Group(object):
 
 
 class Grid(object):
-
+    """
+    Grid represents the entire Sudoku-grid. Keeps track of all Cells and the
+    Groups they are a member of. Traditionally, each Cell is part of three
+    Groups: The "horziontal", the "vertical" and the "block" group.
+    """
     def __init__(self):
         self.cells = []
         self.rows = [Group() for x in SUDOKU_RANGE]
