@@ -39,7 +39,10 @@ def main():
 	# c.set(2)
 	# print c
 
-	print display.compact(grid)
+	print display.serialise(grid)
+	print display.simple(grid)
+	print display.default(grid)
+	print display.full(grid)
 
 	# print display.simple(grid)
 	# print display.expanded(grid)

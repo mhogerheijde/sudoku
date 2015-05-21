@@ -1,62 +1,77 @@
+# vim: set fileencoding=UTF-8
 from . import Grid, Cell, SUDOKU_RANGE, SUDOKU_POSSIBILITIES
 
 
-def compact(element):
+def serialise(element):
     if isinstance(element, Grid):
-        return _compact_grid(element)
+        return _serialise_grid(element)
     elif isinstance(element, Cell):
-        return _compact_cell(element)
+        return _serialise_cell(element)
 
 def simple(element):
     if isinstance(element, Grid):
         return _simple_grid(element)
     elif isinstance(element, Cell):
-        return _simple_cell(element)
+        return _default_cell(element)
 
-def expanded(element):
+def default(element):
     if isinstance(element, Grid):
-        return _expanded_grid(element)
+        return _default_grid(element)
     elif isinstance(element, Cell):
-        return _expanded_cell(element)
+        return _default_cell(element)
+
+def full(element):
+    if isinstance(element, Grid):
+        return _full_grid(element)
+    elif isinstance(element, Cell):
+        return _full_cell(element)
+
+def _default_grid(grid):
+    result = u"┏━┯━┯━┳━┯━┯━┳━┯━┯━┓\n"
+
+    for vertical, row in enumerate(grid.cells):
+        currentRow = ""
+        for horizontal, cell in enumerate(row):
+
+            delim = u"│" if horizontal % 3 != 0 else u"┃"
+
+            currentRow += delim + default(cell)
+
+        result += currentRow + u"┃\n"
+
+        if vertical == 8:
+            result += u"┗━┷━┷━┻━┷━┷━┻━┷━┷━┛\n"
+        elif vertical % 3 == 2:
+            result += u"┣━┿━┿━╋━┿━┿━╋━┿━┿━┫\n"
+        else:
+            result += u"┠─┼─┼─╂─┼─┼─╂─┼─┼─┨\n"
+
+    return result
 
 
-def _expanded_grid(grid):
-    result = " +-------+-------+-------++-------+-------+-------++-------+-------+-------+\n"
+
+def _full_grid(grid):
+    result = u" ┏━━━━━━━┯━━━━━━━┯━━━━━━━┳━━━━━━━┯━━━━━━━┯━━━━━━━┳━━━━━━━┯━━━━━━━┯━━━━━━━┓\n"
     for vertical, row in enumerate(grid.cells):
         currentRowString = ["", "", ""]
         for horizontal, cell in enumerate(row):
 
-            cellString = expanded(cell)
+            cellString = full(cell)
 
-            delim = " | " if horizontal % 3 != 0 or horizontal == 0 else " || "
+            delim = u" │ " if horizontal % 3 != 0 else u" ┃ "
 
             currentRowString[0] += delim + cellString[0]
             currentRowString[1] += delim + cellString[1]
             currentRowString[2] += delim + cellString[2]
 
-        result += currentRowString[0] + " |\n" + currentRowString[1] + " |\n" + currentRowString[2] + " |\n"
+        result += currentRowString[0] + u" ┃\n" + currentRowString[1] + u" ┃\n" + currentRowString[2] + u" ┃\n"
 
-        if vertical % 3 == 2 and vertical != 8:
-            result += " +=======+=======+=======++=======+=======+=======++=======+=======+=======+\n"
+        if vertical == 8:
+            result += u" ┗━━━━━━━┷━━━━━━━┷━━━━━━━┻━━━━━━━┷━━━━━━━┷━━━━━━━┻━━━━━━━┷━━━━━━━┷━━━━━━━┛\n"
+        elif vertical % 3 == 2:
+            result += u" ┣━━━━━━━┿━━━━━━━┿━━━━━━━╋━━━━━━━┿━━━━━━━┿━━━━━━━╋━━━━━━━┿━━━━━━━┿━━━━━━━┫\n"
         else:
-            result += " +-------+-------+-------++-------+-------+-------++-------+-------+-------+\n"
-
-    return result
-
-def _expanded_cell(cell):
-    result = []
-    current = ""
-    for i, value in enumerate(SUDOKU_POSSIBILITIES):
-        if value in cell.possibilities:
-            current += str(value)
-        else:
-            current += " "
-
-        if i % 3 == 2:
-            result.append(current)
-            current = ""
-        else:
-            current += " "
+            result += u" ┠───────┼───────┼───────╂───────┼───────┼───────╂───────┼───────┼───────┨\n"
 
     return result
 
@@ -75,17 +90,33 @@ def _simple_grid(grid):
             result += "+---+---+---+\n"
     return result
 
-def _simple_cell(cell):
-    return "?" if cell.value is None else str(cell.value)
-
-
-def _compact_grid(grid):
+def _serialise_grid(grid):
     result = ""
     for rows in grid.cells:
         for cell in rows:
-            result += compact(cell)
+            result += serialise(cell)
         result += "\n"
     return result
 
-def _compact_cell(cell):
-    return "?" if cell.value is None else str(cell.value)
+def _serialise_cell(cell):
+    return "? " if cell.value is None else str(cell.value) + " "
+
+def _default_cell(cell):
+    return " " if cell.value is None else str(cell.value)
+
+def _full_cell(cell):
+    result = []
+    current = ""
+    for i, value in enumerate(SUDOKU_POSSIBILITIES):
+        if value in cell.possibilities:
+            current += str(value)
+        else:
+            current += " "
+
+        if i % 3 == 2:
+            result.append(current)
+            current = ""
+        else:
+            current += " "
+
+    return result
