@@ -28,6 +28,11 @@ class Cell(object):
             # Don't care if not in list.
             pass
 
+        if len(self.possibilities) == 0:
+            raise Exception("No options left after elimiation")
+        elif len(self.possibilities) == 1:
+            self.set(self.possibilities[0])
+
     def set(self, value):
         if not self.value is None and self.value != int(value):
             raise Exception("This cell already has a value {}, which differs from {}".format(self.value, value))
