@@ -1,6 +1,8 @@
 # vim: set fileencoding=UTF-8
 import sudoku
+from termcolor import colored
 
+grey = lambda x: colored(x, 'grey')
 
 def serialise(element):
     if isinstance(element, sudoku.Grid):
@@ -54,7 +56,9 @@ def _default_grid(grid):
 
 
 def _full_grid(grid):
-    result = u" ┏━━━━━━━┯━━━━━━━┯━━━━━━━┳━━━━━━━┯━━━━━━━┯━━━━━━━┳━━━━━━━┯━━━━━━━┯━━━━━━━┓\n"
+    result = grey(u" ┏━━━━━━━┯━━━━━━━┯━━━━━━━┳━━━━━━━┯━━━━━━━┯━━━━━━━┳━━━━━━━┯━━━━━━━┯━━━━━━━┓\n")
+
+    separator = grey(u" ┃\n")
 
     for vertical in sudoku.SUDOKU_RANGE:
         currentRowString = ["", "", ""]
@@ -64,20 +68,20 @@ def _full_grid(grid):
 
             cellString = full(cell)
 
-            delim = u" │ " if horizontal % 3 != 0 else u" ┃ "
+            delim = grey(u" │ ") if horizontal % 3 != 0 else grey(u" ┃ ")
 
             currentRowString[0] += delim + cellString[0]
             currentRowString[1] += delim + cellString[1]
             currentRowString[2] += delim + cellString[2]
 
-        result += currentRowString[0] + u" ┃\n" + currentRowString[1] + u" ┃\n" + currentRowString[2] + u" ┃\n"
+        result += currentRowString[0] + separator + currentRowString[1] + separator + currentRowString[2] + separator
 
         if vertical == 8:
-            result += u" ┗━━━━━━━┷━━━━━━━┷━━━━━━━┻━━━━━━━┷━━━━━━━┷━━━━━━━┻━━━━━━━┷━━━━━━━┷━━━━━━━┛\n"
+            result += grey(u" ┗━━━━━━━┷━━━━━━━┷━━━━━━━┻━━━━━━━┷━━━━━━━┷━━━━━━━┻━━━━━━━┷━━━━━━━┷━━━━━━━┛\n")
         elif vertical % 3 == 2:
-            result += u" ┣━━━━━━━┿━━━━━━━┿━━━━━━━╋━━━━━━━┿━━━━━━━┿━━━━━━━╋━━━━━━━┿━━━━━━━┿━━━━━━━┫\n"
+            result += grey(u" ┣━━━━━━━┿━━━━━━━┿━━━━━━━╋━━━━━━━┿━━━━━━━┿━━━━━━━╋━━━━━━━┿━━━━━━━┿━━━━━━━┫\n")
         else:
-            result += u" ┠───────┼───────┼───────╂───────┼───────┼───────╂───────┼───────┼───────┨\n"
+            result += grey(u" ┠───────┼───────┼───────╂───────┼───────┼───────╂───────┼───────┼───────┨\n")
 
     return result
 
@@ -113,17 +117,25 @@ def _default_cell(cell):
 
 def _full_cell(cell):
     result = []
-    current = ""
-    for i, value in enumerate(sudoku.SUDOKU_POSSIBILITIES):
-        if value in cell.possibilities:
-            current += str(value)
-        else:
-            current += " "
 
-        if i % 3 == 2:
-            result.append(current)
-            current = ""
-        else:
-            current += " "
+    if cell.value is None:
+        current = ""
+        for i, value in enumerate(sudoku.SUDOKU_POSSIBILITIES):
+            if value in cell.possibilities:
+                current += str(value)
+            else:
+                current += " "
+
+            if i % 3 == 2:
+                result.append(current)
+                current = ""
+            else:
+                current += " "
+    else:
+        result = [
+         "     ",
+         colored("  {}  ".format(cell.value), 'green'),
+         "     ",
+        ]
 
     return result
