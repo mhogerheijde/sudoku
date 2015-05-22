@@ -7,7 +7,7 @@ grey = lambda x: colored(x, 'grey')
 def serialise(element):
     if isinstance(element, sudoku.Grid):
         return _serialise_grid(element)
-    elif isinstance(element, Cell):
+    elif isinstance(element, sudoku.Cell):
         return _serialise_cell(element)
     else:
         raise Exception("{} element is Grid nor Cell".format(type(element)))
