@@ -15,6 +15,7 @@ class Cell(object):
         self.possibilities = copy(SUDOKU_POSSIBILITIES)
         self.coordinates = coordinates
         self.value = None
+        self.checked = False
 
     def __str__(self):
         value = "?" if self.value is None else str(self.value)

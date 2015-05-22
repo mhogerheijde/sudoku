@@ -20,8 +20,9 @@ class Solver(object):
     def _eliminate(self):
         for vertical, horizontal in self.grid.cells:
             cell = self.grid.cells[(vertical, horizontal)]
-            if cell.value != None:
+            if not cell.checked and cell.value != None:
                 self.grid.setCell(cell, cell.value)
+                cell.cecked = True
 
 
 
