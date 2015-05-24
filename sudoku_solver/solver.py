@@ -1,6 +1,10 @@
 import copy
 import display
+import logging
 
+import sudoku
+
+logger = logging.getLogger(__name__)
 
 class Solver(object):
 
@@ -11,6 +15,10 @@ class Solver(object):
 
 
     def step(self):
+        logger.debug(" **** STEP {} ****  ".format(self.currentStep))
+        if self.isSolved():
+            raise Exception("Sudoku is sovled already")
+
         self._make_history()
 
         self._eliminate()
@@ -24,6 +32,10 @@ class Solver(object):
                 self.grid.setCell(cell, cell.value)
                 cell.cecked = True
 
+
+
+    def isSolved(self):
+        return len(self.grid.unsolved) == 0
 
 
     def _make_history(self):
