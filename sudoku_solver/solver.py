@@ -38,11 +38,11 @@ class Solver(object):
         self.currentStep += 1
 
     def _eliminate(self):
-        for vertical, horizontal in self.grid.cells:
-            cell = self.grid.cells[(vertical, horizontal)]
-            if not cell.checked and cell.value != None:
-                self.grid.setCell(cell, cell.value)
-                cell.cecked = True
+        for cell in copy.copy(self.grid.unsolved):
+            # We're changing the content of unsolved
+            logger.debug("Working on cell: {}".format(cell))
+            if len(cell.possibilities) == 1:
+                self.grid.solveCell(cell, cell.possibilities[0])
 
 
 
