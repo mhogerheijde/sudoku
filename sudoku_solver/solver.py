@@ -18,6 +18,8 @@ class Solver(object):
         self.grid = grid
         self.history = []
 
+    def isSolved(self):
+        return len(self.grid.unsolved) == 0
 
     def step(self):
         logger.debug(" **** STEP {} ****  ".format(self.currentStep))
@@ -74,8 +76,6 @@ class Solver(object):
         return result
 
 
-    def isSolved(self):
-        return len(self.grid.unsolved) == 0
 
 
     def _make_history(self):
