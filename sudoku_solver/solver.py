@@ -28,6 +28,9 @@ class Solver(object):
 
         logger.debug(" **** ELIMINATION ****  ")
         self._eliminate()
+        logger.debug(" **** INFERRING ****  ")
+        self._infer()
+
 
 
         current_sha = sha256(display.serialise(self.grid)).hexdigest()
@@ -44,6 +47,31 @@ class Solver(object):
             if len(cell.possibilities) == 1:
                 self.grid.solveCell(cell, cell.possibilities[0])
 
+    def _infer(self):
+        for i in self.grid.rows:
+            self._infer_group(self.grid.rows[i])
+        for i in self.grid.columns:
+            self._infer_group(self.grid.columns[i])
+        for i in self.grid.blocks:
+            self._infer_group(self.grid.blocks[i])
+
+
+
+    def _infer_group(self, group):
+        for value in sudoku.SUDOKU_RANGE:
+            cells = self._cells_with_possible_value(group, value)
+            if len(cells) == 1:
+                cell = cells[0]
+                logger.debug("{} is the only cell to contain {}".format(cell, value))
+                cell.possibilities = [value]
+                # self.grid.solveCell(cell, value)
+
+    def _cells_with_possible_value(self, group, value):
+        result = []
+        for cell in group.cells:
+            if value in cell.possibilities and cell.value is None:
+                result.append(cell)
+        return result
 
 
     def isSolved(self):
