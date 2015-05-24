@@ -1,5 +1,7 @@
 # vim: set fileencoding=UTF-8
 import sudoku
+
+import json
 from termcolor import colored
 
 grey = lambda x: colored(x, 'grey')
@@ -103,13 +105,18 @@ def _simple_grid(grid):
     return result
 
 def _serialise_grid(grid):
-    result = ""
-    for coordinates in grid.cells:
-        vertical, horizontal = coordinates
-        result += serialise(grid.cells[coordinates])
-        if (horizontal % 9 == 8):
-            result += "\n"
-    return result
+    grid_list = {}
+    for coordinates, cell in grid.cells.iteritems():
+
+        cell_dict = {
+            'coordinates': cell.coordinates,
+            'value': cell.value,
+            'possibilities': cell.possibilities
+        }
+        grid_list["{}x{}".format(coordinates[0], coordinates[1])] = cell_dict
+
+
+    return json.dumps(grid_list, sort_keys=True)
 
 def _serialise_cell(cell):
     return "? " if cell.value is None else str(cell.value) + " "
