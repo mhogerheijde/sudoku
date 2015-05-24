@@ -46,16 +46,10 @@ def solve():
 
     solver = Solver(grid)
 
-    print " ** Unsolved"
     print unicode(solver)
-
-    solver.step()
-    print " ** Step 1"
-    print unicode(solver)
-
-    solver.step()
-    print " ** Step 2"
-    print unicode(solver)
+    while solver.currentStep < 30 and not solver.isSolved():
+        solver.step()
+        print unicode(solver)
 
 
 
