@@ -17,6 +17,8 @@ class Solver(object):
         self.currentStep = 0
         self.grid = grid
         self.history = {}
+        self.assumption = None
+        self.invalidAssumptions = []
 
     def isSolved(self):
         return len(self.grid.unsolved) == 0
@@ -28,17 +30,33 @@ class Solver(object):
 
         self._make_history()
 
-        logger.debug(" **** ELIMINATION ****  ")
-        self._eliminate()
-        logger.debug(" **** INFERRING ****  ")
-        self._infer()
 
-
+        try:
+            logger.debug(" **** ELIMINATION ****  ")
+            self._eliminate()
+            logger.debug(" **** INFERRING ****  ")
+            self._infer()
+        except sudoku.ImpossibleEliminationException, e:
+            if self.assumption is None:
+                # We have an Elimination exception, but we didn't make
+                # any assumptions: Sudoku must be invalid.
+                raise UnsolvableSudkouException(e)
+            else:
+                # We made an assumption, but now our grid is unsolvable,
+                # thus our assumption must be invalid.
+                logger.debug("ImpossibleElimination after assumption: %s", self.assumption)
+                self.invalidAssumptions.append(self.assumption)
+                self.grid = self.history[self.assumption['step']]
+                self.assumption = None
 
         current = display.serialise(self.grid)
         previous = display.serialise(self.history[self.currentStep])
         if current == previous:
-            raise Exception("Previous state is exactly the same as current.")
+            logger.debug("Previous state is equal to current state, make an assumption")
+            assumption = self._create_assumption()
+            logger.debug("Assumption: %s", assumption)
+            self.assumption = assumption
+            self.grid.cells[assumption['coordinates']].possibilities = [assumption['value']]
 
         self.currentStep += 1
 
@@ -57,8 +75,6 @@ class Solver(object):
         for i in self.grid.blocks:
             self._infer_group(self.grid.blocks[i])
 
-
-
     def _infer_group(self, group):
         for value in sudoku.SUDOKU_RANGE:
             cells = self._cells_with_possible_value(group, value)
@@ -66,7 +82,6 @@ class Solver(object):
                 cell = cells[0]
                 logger.debug("{} is the only cell to contain {}".format(cell, value))
                 cell.possibilities = [value]
-                # self.grid.solveCell(cell, value)
 
     def _cells_with_possible_value(self, group, value):
         result = []
@@ -79,6 +94,42 @@ class Solver(object):
     def _make_history(self):
         self.history[self.currentStep] = copy.deepcopy(self.grid)
 
+    def _create_assumption(self):
+
+        validAssumption = False
+        unsolvedCell = 0
+        unusedOption = 0
+        while not validAssumption:
+
+
+            cell = self.grid.unsolved[unsolvedCell]
+            assumption = {
+                'value': cell.possibilities[unusedOption],
+                'coordinates': cell.coordinates,
+                'step': self.currentStep
+            }
+            logger.debug("Generated assumption: %s", assumption)
+
+
+            if len(self.invalidAssumptions) > 0:
+                for invalid in self.invalidAssumptions:
+                    if invalid['coordinates'] == assumption['coordinates'] and invalid['value'] == assumption['value']:
+                        # Current assumption is invalid
+                        unusedOption +=1
+                        if unusedOption >= len(cell.possibilities):
+                            unusedOption = 0
+                            unsolvedCell += 1
+
+                            if unsolvedCell >= len(self.grid.unsolved):
+                                raise UnsolvableSudkouException("Exhausted all possibilities to assume")
+                    else:
+                        validAssumption = True
+            else:
+                validAssumption = True
+
+
+        return assumption
+
 
     def __str__(self):
         step = "Step {}".format(self.currentStep) if self.currentStep != 0 else "Start"
@@ -87,6 +138,6 @@ class Solver(object):
         return result + "\n" + display.full(self.grid)
 
 
-class UnsolveableSudkouException(Exception):
+class UnsolvableSudkouException(Exception):
     pass
 
