@@ -1,8 +1,12 @@
 import copy
 import display
 import logging
+from termcolor import colored
 
 import sudoku
+
+green = lambda x: colored(x, 'green')
+red = lambda x: colored(x, 'red')
 
 logger = logging.getLogger(__name__)
 
@@ -45,4 +49,9 @@ class Solver(object):
 
 
     def __str__(self):
-        return display.full(self.grid)
+        step = "Step {}".format(self.currentStep) if self.currentStep != 0 else "Start"
+        result = " ** {} ({})".format(step, green("solved") if self.isSolved() else red("unsolved") )
+        result += u"\n [{}]".format(sha256(display.serialise(self.grid)).hexdigest())
+        return result + "\n" + display.full(self.grid)
+
+
