@@ -33,9 +33,9 @@ class Solver(object):
 
 
 
-        current_sha = sha256(display.serialise(self.grid)).hexdigest()
-        previous_sha = sha256(display.serialise(self.history[-1])).hexdigest()
-        if current_sha == previous_sha:
+        current = display.serialise(self.grid)
+        previous = display.serialise(self.history[self.currentStep])
+        if current == previous:
             raise Exception("Previous state is exactly the same as current.")
 
         self.currentStep += 1
