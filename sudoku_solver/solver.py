@@ -16,7 +16,7 @@ class Solver(object):
     def __init__(self, grid):
         self.currentStep = 0
         self.grid = grid
-        self.history = []
+        self.history = {}
 
     def isSolved(self):
         return len(self.grid.unsolved) == 0
@@ -76,12 +76,8 @@ class Solver(object):
         return result
 
 
-
-
     def _make_history(self):
-        self.history.append(self.grid)
-        grid = copy.deepcopy(self.grid)
-        self.grid = grid
+        self.history[self.currentStep] = copy.deepcopy(self.grid)
 
 
     def __str__(self):
