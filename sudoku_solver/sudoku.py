@@ -1,6 +1,9 @@
 # vim: set fileencoding=UTF-8
 from collections import OrderedDict
 from copy import copy
+import logging
+
+logger = logging.getLogger(__name__)
 
 SUDOKU_POSSIBILITIES = range(1, 10)
 SUDOKU_RANGE = range(0, 9)

@@ -4,6 +4,8 @@ from sudoku import Grid, Cell
 from . import display
 from solver import Solver
 
+import argparse
+import logging
 
 
 
@@ -31,8 +33,13 @@ partially_solved = """
 4 9 6 7 8 2 1 5 3
 """
 
-def main():
-    print u"Sudoku Solver™\n\n"
+class ArgumentParser(argparse.ArgumentParser):
+    def error(self, message):
+        self.print_usage(sys.stderr)
+        self.exit(1, gettext('%s: error: %s\n') % (self.prog, message))
+
+def solve():
+
 
     grid = Grid()
     grid.readState(solvable)
@@ -51,6 +58,38 @@ def main():
     print unicode(solver)
 
 
+
+
+def parse_args(args=None):
+    parser = ArgumentParser(
+            description='Solve a sudoku.',
+            formatter_class=argparse.RawDescriptionHelpFormatter)
+
+    parser.add_argument('-d', '--debug', dest='debug', action='store_true',
+            help='show debugging output')
+    parser.add_argument('-q', '--quiet', dest='quiet', action='store_true',
+            help='makes this command quiet, outputting only errors. This also mutes --debug.')
+
+    return parser.parse_args(args)
+
+
+def setup_logging(args):
+
+    logging.basicConfig(format='%(message)s', level=logging.ERROR)
+
+    loglevel = logging.INFO
+    if args.quiet:
+        loglevel = logging.ERROR
+    elif args.debug:
+        loglevel = logging.DEBUG
+
+    logging.getLogger("sudoku_solver").setLevel(loglevel)
+
+def main():
+    # print u"Sudoku Solver™\n\n"
+    args = parse_args()
+    setup_logging(args)
+    solve()
 
 
 if __name__ == 'main':
