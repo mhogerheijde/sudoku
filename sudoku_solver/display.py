@@ -125,9 +125,11 @@ def _default_cell(cell):
     return " " if cell.value is None else str(cell.value)
 
 def _full_cell(cell):
-    result = []
+    result = ["     ", red(" ??? "), "     "]
+
 
     if cell.value is None and len(cell.possibilities) > 1:
+        result = []
         current = ""
         for i, value in enumerate(sudoku.SUDOKU_POSSIBILITIES):
             if value in cell.possibilities:
