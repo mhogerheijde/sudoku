@@ -18,7 +18,6 @@ class Cell(object):
         self.possibilities = copy(SUDOKU_POSSIBILITIES)
         self.coordinates = coordinates
         self.value = None
-        self.checked = False
 
     def __str__(self):
         value = "?" if self.value is None else str(self.value)
@@ -33,9 +32,7 @@ class Cell(object):
             pass
 
         if len(self.possibilities) == 0:
-            raise Exception("No options left after elimiation")
-        elif len(self.possibilities) == 1:
-            self.set(self.possibilities[0])
+            raise ImpossibleEliminationException("No options left after elimiation")
 
     def set(self, value):
         if not self.value is None and self.value != int(value):
@@ -78,16 +75,15 @@ class Group(object):
             raise Exception("Cell {} already in this Group", cell)
         self.cells.append(cell)
 
-    def setCell(self, cell, value):
+    def solveCell(self, cell):
         if cell not in self.cells:
             raise Exception("Cell not managed by this group")
 
-        cell.set(value)
         for c in self.cells:
 
             if not c is cell:
                 # Yes, Identity check, I want the same object.
-                c.eliminate(value)
+                c.eliminate(cell.value)
 
 
 
@@ -105,6 +101,8 @@ class Grid(object):
         self.rows = {}
         self.columns = {}
         self.blocks = {}
+        self.solved = []
+        self.unsolved = []
 
         for vertical in SUDOKU_RANGE:
             for horizontal in SUDOKU_RANGE:
@@ -119,6 +117,8 @@ class Grid(object):
                 self._getRow(coordinates).addCell(cell)
                 self._getColumn(coordinates).addCell(cell)
                 self._getBlock(coordinates).addCell(cell)
+                self.unsolved.append(cell)
+
 
 
 
@@ -130,10 +130,20 @@ class Grid(object):
 
         return "Grid<Size: {}, Cells: \n{}\n>".format(len(self.cells), cells)
 
-    def setCell(self, cell, value):
-        self._getRow(cell.coordinates).setCell(cell, value)
-        self._getColumn(cell.coordinates).setCell(cell, value)
-        self._getBlock(cell.coordinates).setCell(cell, value)
+    def solveCell(self, cell, value):
+        logger.debug("  - Solving cell {} to {}".format(cell, value))
+        # Set cell to actual value
+        cell.set(value)
+
+        # Keep all groups up-to-date
+        self._getRow(cell.coordinates).solveCell(cell)
+        self._getColumn(cell.coordinates).solveCell(cell)
+        self._getBlock(cell.coordinates).solveCell(cell)
+
+        # Do bookkeeping of which cells are solved yet
+        self.unsolved.remove(cell)
+        self.solved.append(cell)
+
 
     def _getBlock(self, coordinates):
         # Calculate block number. Groups of nine in a square,
@@ -176,15 +186,17 @@ class Grid(object):
                 raise Exception("Invalid sudoku format: {} values given, {} expected in line {} '{}'",
                     len(cells), len(SUDOKU_RANGE), lineno, line)
 
-            for cellno, cell in enumerate(cells):
-                if not str(cell).isdigit():
+            for cellno, cellValue in enumerate(cells):
+                if not str(cellValue).isdigit():
                     continue
 
-                if int(cell) not in SUDOKU_POSSIBILITIES:
-                    raise Exception("Invalid cell value '{}': line {}, position {}", cell, lineno, cellno)
+                if int(cellValue) not in SUDOKU_POSSIBILITIES:
+                    raise Exception("Invalid cell value '{}': line {}, position {}", cellValue, lineno, cellno)
 
-                self.cells[(lineno, cellno)].set(cell)
-
-
+                self.cells[(lineno, cellno)].possibilities = [ int(cellValue) ]
 
 
+
+
+class ImpossibleEliminationException(Exception):
+    pass
