@@ -2,6 +2,7 @@ import copy
 import display
 import logging
 from termcolor import colored
+from hashlib import sha256
 
 import sudoku
 
@@ -15,7 +16,7 @@ class Solver(object):
     def __init__(self, grid):
         self.currentStep = 0
         self.grid = grid
-        self.history = [ ]
+        self.history = []
 
 
     def step(self):
@@ -25,7 +26,14 @@ class Solver(object):
 
         self._make_history()
 
+        logger.debug(" **** ELIMINATION ****  ")
         self._eliminate()
+
+
+        current_sha = sha256(display.serialise(self.grid)).hexdigest()
+        previous_sha = sha256(display.serialise(self.history[-1])).hexdigest()
+        if current_sha == previous_sha:
+            raise Exception("Previous state is exactly the same as current.")
 
         self.currentStep += 1
 
@@ -54,4 +62,7 @@ class Solver(object):
         result += u"\n [{}]".format(sha256(display.serialise(self.grid)).hexdigest())
         return result + "\n" + display.full(self.grid)
 
+
+class UnsolveableSudkouException(Exception):
+    pass
 
