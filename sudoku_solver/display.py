@@ -3,6 +3,8 @@ import sudoku
 from termcolor import colored
 
 grey = lambda x: colored(x, 'grey')
+red = lambda x: colored(x, 'red')
+green = lambda x: colored(x, 'green')
 
 def serialise(element):
     if isinstance(element, sudoku.Grid):
@@ -118,7 +120,7 @@ def _default_cell(cell):
 def _full_cell(cell):
     result = []
 
-    if cell.value is None:
+    if cell.value is None and len(cell.possibilities) > 1:
         current = ""
         for i, value in enumerate(sudoku.SUDOKU_POSSIBILITIES):
             if value in cell.possibilities:
@@ -131,10 +133,16 @@ def _full_cell(cell):
                 current = ""
             else:
                 current += " "
-    else:
+    elif cell.value is None and len(cell.possibilities) == 1:
         result = [
          "     ",
-         colored("  {}  ".format(cell.value), 'green'),
+         red("  {}  ".format(cell.possibilities[0])),
+         "     ",
+        ]
+    elif not cell.value is None :
+        result = [
+         "     ",
+         green("  {}  ".format(cell.value)),
          "     ",
         ]
 
