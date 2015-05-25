@@ -47,16 +47,22 @@ class Solver(object):
                 logger.debug("ImpossibleElimination after assumption: %s", self.assumption)
                 self.invalidAssumptions.append(self.assumption)
                 self.grid = self.history[self.assumption['step']]
+                # TODO it would be quicker to make a new assumption immediately
                 self.assumption = None
 
         current = display.serialise(self.grid)
         previous = display.serialise(self.history[self.currentStep])
         if current == previous:
             logger.debug("Previous state is equal to current state, make an assumption")
-            assumption = self._create_assumption()
-            logger.debug("Assumption: %s", assumption)
-            self.assumption = assumption
-            self.grid.cells[assumption['coordinates']].possibilities = [assumption['value']]
+            if self.assumption is None:
+                assumption = self._create_assumption()
+                logger.debug("Assumption: %s", assumption)
+                self.assumption = assumption
+                self.grid.cells[assumption['coordinates']].possibilities = [assumption['value']]
+            else:
+                # TODO Make this work with a chain of assumptions
+                logger.debug("We already made an assumption, but we didn't end up in a solved or erroneous state.")
+                raise UnsolvableSudkouException("Sorry, unable to make multiple assumptions in a row")
 
         self.currentStep += 1
 
