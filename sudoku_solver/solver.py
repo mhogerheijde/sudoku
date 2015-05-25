@@ -96,6 +96,8 @@ class Solver(object):
 
     def _create_assumption(self):
 
+        logger.debug("Current invalid assumptions: %s", self.invalidAssumptions)
+
         validAssumption = False
         unsolvedCell = 0
         unusedOption = 0
@@ -111,10 +113,12 @@ class Solver(object):
             logger.debug("Generated assumption: %s", assumption)
 
 
+            foundInvalid = False
             if len(self.invalidAssumptions) > 0:
                 for invalid in self.invalidAssumptions:
                     if invalid['coordinates'] == assumption['coordinates'] and invalid['value'] == assumption['value']:
                         # Current assumption is invalid
+                        foundInvalid = True
                         unusedOption +=1
                         if unusedOption >= len(cell.possibilities):
                             unusedOption = 0
@@ -122,10 +126,8 @@ class Solver(object):
 
                             if unsolvedCell >= len(self.grid.unsolved):
                                 raise UnsolvableSudkouException("Exhausted all possibilities to assume")
-                    else:
-                        validAssumption = True
-            else:
-                validAssumption = True
+
+            validAssumption = not foundInvalid
 
 
         return assumption
