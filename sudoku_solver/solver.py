@@ -66,14 +66,43 @@ class Solver(object):
 
         self.currentStep += 1
 
+
+
+    ############################################################################
+    # Solving strategies
+    ############################################################################
+
+
     def _eliminate(self):
+        """
+        Simple bookkeeping strategy that follows directly from the rules of
+        Sudoku: A number can only be present once in a column, row or group;
+        thus if we know a cell to hold a certain value, all other cells in the
+        same column, row and group can't hold that value any-more.
+        """
+
+        # We're changing the content of the list unsolved during iteration
+        # so make a copy of the list, we do want the cells, so a shallow copy.
         for cell in copy.copy(self.grid.unsolved):
-            # We're changing the content of unsolved
+            # Loop over all cells not yet solved. (This includes cells that
+            # only have one possible value left; these are not "processed" yet
+            # and therefore don't have the status "solved")
             logger.debug("Working on cell: {}".format(cell))
             if len(cell.possibilities) == 1:
+                # There is only one possibility left. Solve this cell to that
+                # value. "solving" will also cross out this value in other cells
+                # that now can't hold that value any-more
                 self.grid.solveCell(cell, cell.possibilities[0])
 
     def _infer(self):
+        """
+        Strategy that checks if a certain value can only be present in 1 cell
+        for a certain group. Even though this cell might have some other possible
+        values, since this is the only cell to have this certain value as a
+        possibility it therefore must have that specific value.
+        """
+
+        # Loop over all groups (rows, columns and blocks)
         for i in self.grid.rows:
             self._infer_group(self.grid.rows[i])
         for i in self.grid.columns:
@@ -82,6 +111,11 @@ class Solver(object):
             self._infer_group(self.grid.blocks[i])
 
     def _infer_group(self, group):
+        """
+        Within a group, check if there is a cell that is the only cell to have
+        a certain value left as a possibility
+        """
+
         for value in sudoku.SUDOKU_RANGE:
             cells = self._cells_with_possible_value(group, value)
             if len(cells) == 1:
@@ -95,6 +129,11 @@ class Solver(object):
             if value in cell.possibilities and cell.value is None:
                 result.append(cell)
         return result
+
+
+    ############################################################################
+    # Helper methods
+    ############################################################################
 
 
     def _make_history(self):
