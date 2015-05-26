@@ -53,9 +53,15 @@ class Group(object):
     the same group can't have that value any more.
     """
 
-    def __init__(self, cells=None):
+    def __init__(self, cells=None, row=None, column=None, block=None):
+        self.row = row
+        self.column = column
+        self.block = block
 
-        self.solved = False
+        if (row is not None and (column is not None or block is not None)) \
+            or (column is not None and (row is not None or block is not None)) \
+            or (block is not None and (row is not None or column is not None)):
+            raise Exception("Illegal state: cannot have a group in multiple orientations")
 
         if cells == None:
             self.cells =  []
@@ -66,7 +72,16 @@ class Group(object):
         cells = ""
         for cell in self.cells:
             cells += "\t{}\n".format(cell)
-        result = "Group<size:{} cells:\n{}>".format(len(self.cells), cells)
+
+        location = "??"
+        if this.row is not None:
+            location = "row: {}".format(this.row)
+        elif this.column is not None:
+            location = "column: {}".format(this.column)
+        elif this.block is not None:
+            location = "block: {}".format(this.block)
+
+        result = "Group<{}; size: {}; cells:\n{}>".format(location, len(self.cells), cells)
 
         return result
 
@@ -97,26 +112,35 @@ class Grid(object):
 
 
     def __init__(self):
+        # All the cells in the grid
         self.cells = OrderedDict()
-        self.rows = {}
-        self.columns = {}
-        self.blocks = {}
-        self.solved = []
+
+        # Sub-orientation of the grid
+        self.rows = {}     # Index of all the rows (by row-number)
+        self.columns = {}  # Index of all the columns (by column-number)
+        self.blocks = {}   # Index of all the blocks (by block-number)
+        # All the groups in one list for easy access.
+        self.groups = []
+
+        # Bookkeeping of unsolved cells.
         self.unsolved = []
 
         for vertical in SUDOKU_RANGE:
             for horizontal in SUDOKU_RANGE:
                 # New cell at spot (vertical, horizontal)
-                cell = Cell((vertical, horizontal))
-
-                # Add cell to groups and lookup-lists
-                self.cells[(vertical, horizontal)] = cell
-
                 coordinates = (vertical, horizontal)
 
+                # Create new cell
+                cell = Cell(coordinates)
+
+                # Add cell to groups and lookup-lists
+                self.cells[coordinates] = cell
+
+                # Add cells to the appropriate groups
                 self._getRow(coordinates).addCell(cell)
                 self._getColumn(coordinates).addCell(cell)
                 self._getBlock(coordinates).addCell(cell)
+                # All cells are in unsolved state initially
                 self.unsolved.append(cell)
 
 
@@ -140,9 +164,8 @@ class Grid(object):
         self._getColumn(cell.coordinates).solveCell(cell)
         self._getBlock(cell.coordinates).solveCell(cell)
 
-        # Do bookkeeping of which cells are solved yet
+        # Do bookkeeping of unsolved cells
         self.unsolved.remove(cell)
-        self.solved.append(cell)
 
 
     def _getBlock(self, coordinates):
@@ -156,21 +179,28 @@ class Grid(object):
         blockNo = 3 * int(vertical / 3) + (horizontal / 3)
 
         if not blockNo in self.blocks:
-            self.blocks[blockNo] = Group()
+            new_group = Group(block=blockNo)
+            self.blocks[blockNo] = new_group
+            self.groups.append(new_group)
 
         return self.blocks[blockNo]
 
     def _getRow(self, coordinates):
         vertical, horizontal = coordinates
         if not vertical in self.rows:
-            self.rows[vertical] = Group()
+            new_group = Group(row=vertical)
+            self.rows[vertical] = new_group
+            self.groups.append(new_group)
 
         return self.rows[vertical]
 
     def _getColumn(self, coordinates):
         vertical, horizontal = coordinates
         if not horizontal in self.columns:
-            self.columns[horizontal] = Group()
+            new_group = Group(column=horizontal)
+            self.columns[horizontal] = new_group
+            self.groups.append(new_group)
+
 
         return self.columns[horizontal]
 
