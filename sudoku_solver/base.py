@@ -9,7 +9,7 @@ import logging
 
 
 
-solvable = """
+original_solvable = """
 9 2 . . 7 . 8 . 4
 . . 3 . . 9 . . .
 . . 8 6 4 1 9 . .
@@ -20,6 +20,31 @@ solvable = """
 . . . 1 . . 2 . .
 4 . 6 . 8 . . 5 3
 """
+
+solvable = """
+. . . . . . . 4 .
+. 4 . . . 6 9 . 8
+. 3 . . 7 4 . 2 6
+7 . . . . . 2 . .
+. . . 5 . 1 . . .
+. . 1 . . . . . 3
+4 7 . 9 8 . . 6 .
+6 . 8 2 . . . 9 .
+. 2 . . . . . . .
+"""
+
+solvable2 = """
+. 9 . . 7 3 . . 5
+4 . 8 2 . . 3 . .
+. . 5 . . . . . .
+. . 7 3 . . 5 8 .
+. . . . 1 . . . .
+. 4 3 . . 7 6 . .
+. . . . . . 2 . .
+. . 6 . . 5 9 . 4
+3 . . 1 4 . . 7 .
+"""
+
 
 partially_solved = """
 9 2 1 5 7 3 8 . 4
@@ -42,12 +67,12 @@ def solve():
 
 
     grid = Grid()
-    grid.readState(solvable)
+    grid.readState(solvable2)
 
     solver = Solver(grid)
 
     print unicode(solver)
-    while solver.currentStep < 30 and not solver.isSolved():
+    while solver.currentStep < 20 and not solver.isSolved():
         solver.step()
         print unicode(solver)
 

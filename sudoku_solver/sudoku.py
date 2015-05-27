@@ -74,12 +74,12 @@ class Group(object):
             cells += "\t{}\n".format(cell)
 
         location = "??"
-        if this.row is not None:
-            location = "row: {}".format(this.row)
-        elif this.column is not None:
-            location = "column: {}".format(this.column)
-        elif this.block is not None:
-            location = "block: {}".format(this.block)
+        if self.row is not None:
+            location = "row: {}".format(self.row)
+        elif self.column is not None:
+            location = "column: {}".format(self.column)
+        elif self.block is not None:
+            location = "block: {}".format(self.block)
 
         result = "Group<{}; size: {}; cells:\n{}>".format(location, len(self.cells), cells)
 
